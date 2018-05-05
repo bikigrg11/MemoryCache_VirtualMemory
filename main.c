@@ -9,11 +9,6 @@
 #include <sys/stat.h>
 #include "functions.h"
 
-// Functions and Methods
-// int cse320_malloc(int X);
-// int cse320_virt_to_phys(int virtual_address, int proces_id);
-// void *run_method();
-// void add_to_cache(int physical_add, int val);
 
 // Structs and Typedef
 
@@ -22,6 +17,7 @@
 int thread_created= 0;
 pthread_t thread_inc[4];
 //int allocIndex[4];
+
 
 int main(){
 
@@ -56,17 +52,38 @@ int main(){
 
         if(!strcmp(input_func,"create")){
             // CREATE
-            if(empty_place == 1){
+            if(thread_created < 4){
+                pthread_create(&thread_inc[thread_created],NULL,&run_method,NULL);
+                thread_num[thread_created] = malloc(sizeof(first_level));
+                ptable_num[thread_created] = malloc(sizeof(second_level));
+                thread_num[thread_created]-> use_flag = 1;
+                thread_num[thread_created]-> ptr_thread = thread_inc[thread_created];
+                //ptable_thread1->virtual_address[0] = 0;
+                //ptable_thread1->valid_bit[0] = 0;
+                printf("Created Process : New thread created.\n\n");
+                thread_created ++;
+            }
+            else if(empty_place == 1){
                 for(int i=0;i<4;i++){
-                    if(thread_inc[i] == 0){
+                    if(thread_num[i]-> use_flag == 0){
                         pthread_create(&thread_inc[i],NULL,&run_method,NULL);
                         thread_num[i] = malloc(sizeof(first_level));
                         ptable_num[i] = malloc(sizeof(second_level));
                         thread_num[i]-> use_flag = 1;
-                        empty_place = 0;
+                        printf("Created Process : New thread created.\n\n");
+                        //empty_place = 0;
                         break;
                     }
                 }
+                for(int i=0;i<4;i++){
+                    if(thread_num[i]-> use_flag == 0){
+                        empty_place = 1;
+                        break;
+                    }else{
+                        empty_place = 0;
+                    }
+                }
+                //break;
             }else{
                 if(thread_created >= 4){
                     printf("Cannot Create more than 4 threads\n");
@@ -87,15 +104,25 @@ int main(){
             // Stilll need to clear the memory so that when new one is declred no error
             unsigned long int num=0;
             scanf("%lu",&num);
-            pthread_cancel((pthread_t) num);
+            //pthread_cancel((pthread_t) num);
+            //void *ret;
 
             for (int i=0;i<4;i++){
                 if((int)thread_inc[i] == (int)num){
+                    //printf("%lu\n",num);
+                    //printf("%lu\n",(unsigned long)thread_num[i]-> ptr_thread);
+                    //pthread_cleanup_push(thread_num[i]-> ptr_thread,);
+                    //flag_thread = 1;
+                    //pthread_cancel(thread_num[i]-> ptr_thread);
+                    //pthread_kill(thread_inc[i],0);  
+                    //pthread_join(thread_num[i]-> ptr_thread,0);
+
                     thread_num[i]->use_flag = 0;    // If you do this then the first level is deleted and process is killed
                     thread_inc[i] = 0;
                     free(thread_num[i]);
                     free(ptable_num[i]);
                     empty_place = 1;
+                    //thread_created--;
                 }                
             }
 
@@ -270,6 +297,11 @@ int main(){
             
         }else if(!strcmp(input_func,"exit")){
             // EXIT
+            for(int i=0;i<4;i++){
+                free(thread_num[i]);
+                free(ptable_num[i]);
+            }
+            flag_thread = 1;
             printf("exit");
             exit(0);
         }else {
@@ -280,12 +312,12 @@ int main(){
         scanf("%s",input);
         sscanf(input,"%s",input_func);
     }
-    // Super free
+    flag_thread = 1;
+
     for(int i=0;i<4;i++){
         free(thread_num[i]);
         free(ptable_num[i]);
     }
     return 0;
 }
-
 

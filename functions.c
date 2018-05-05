@@ -14,6 +14,7 @@ typedef struct second_layer{
 typedef struct first_layer{
     second_level *ptr[1];
     int use_flag;
+    pthread_t ptr_thread;
 }first_level;
 
 // Mem Cache
@@ -89,8 +90,13 @@ int cse320_virt_to_phys(int virtual_address, int proces_id){
     return virtual_address;
 }
 
+int flag_thread = 0;
+
 void *run_method(){
+    
     while(1){
+        if(flag_thread == 1)
+            return NULL;
     }
     return NULL;
 }
